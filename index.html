@@ -2,216 +2,223 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profileo · чат профориентации</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Profileo · профориентация</title>
   <style>
-    /* ===== мягкая тёмная тема ===== */
+    /* ===== СБРОС И БАЗОВЫЕ НАСТРОЙКИ (адаптив с первых строк) ===== */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at 20% 30%, #1b2633, #0d1219);
+      background: radial-gradient(145% 140% at 0% 0%, #1c2a36, #0e151f);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 12px;
     }
 
-    /* основной контейнер — как стильная тетрадь */
-    .chat-frame {
+    /* ===== ОСНОВНОЙ КОНТЕЙНЕР (резиновый, адаптивный) ===== */
+    .chat-app {
       width: 100%;
-      max-width: 1000px;
-      height: 85vh;
-      max-height: 820px;
-      background: #1d2832;
-      border-radius: 44px 44px 40px 40px;
-      box-shadow: 0 30px 55px -12px #000000d0, inset 0 1px 2px rgba(255,255,255,0.05);
+      max-width: 1200px;      /* для больших экранов */
+      height: 95vh;
+      max-height: 900px;
+      background: #1b2632;
+      border-radius: clamp(28px, 6vw, 48px);  /* адаптивный радиус */
+      box-shadow: 0 25px 60px -15px #000000e0, inset 0 1px 2px rgba(255,255,255,0.05);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border: 1px solid #314d62;
-      backdrop-filter: blur(1px);
+      border: 1px solid #2b4359;
+      backdrop-filter: blur(2px);
+      transition: border-radius 0.2s;
     }
 
-    /* верхняя плашка */
-    .header-area {
-      padding: 20px 28px 12px 28px;
+    /* ===== ШАПКА ===== */
+    .app-header {
+      padding: 16px 20px 10px 20px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 18px;
-      border-bottom: 2px dashed #2e4558;
+      gap: 12px 15px;
+      border-bottom: 2px dashed #2a4053;
     }
 
-    .header-area h1 {
-      font-size: 2rem;
-      font-weight: 520;
-      background: linear-gradient(145deg, #c2e0ff, #9ac6ff);
+    .app-header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 600;
+      background: linear-gradient(135deg, #c8e3ff, #9fcbff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: -0.5px;
-      text-shadow: 0 3px 7px #00000050;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 7px #00000060;
+      line-height: 1.2;
     }
 
-    .api-tag {
-      background: #263d50;
-      padding: 8px 20px;
-      border-radius: 60px;
-      font-size: 0.9rem;
+    .key-badge {
+      background: #1f3649;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: clamp(0.7rem, 2.5vw, 0.9rem);
       font-weight: 500;
-      color: #cadeff;
-      border: 1px solid #3f6180;
+      color: #c4defa;
+      border: 1px solid #3c5e7e;
       box-shadow: inset 0 1px 5px #00000070;
-      backdrop-filter: blur(2px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
     }
 
-    /* окно сообщений */
-    .conversation {
+    /* ===== ОБЛАСТЬ СООБЩЕНИЙ ===== */
+    .messages-view {
       flex: 1;
       overflow-y: auto;
-      padding: 26px 28px 18px 28px;
+      padding: 20px 16px 16px 16px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
-      background: #19232e;
-      box-shadow: inset 0 10px 18px -12px #04080c;
+      gap: 18px;
+      background: #17222d;
+      box-shadow: inset 0 12px 20px -12px #04080c;
       scroll-behavior: smooth;
     }
 
     /* строки сообщений */
-    .msg-line {
+    .msg-row {
       display: flex;
       width: 100%;
     }
 
-    .msg-line.user {
+    .msg-row.user {
       justify-content: flex-end;
     }
 
-    .msg-line.assistant {
+    .msg-row.assistant {
       justify-content: flex-start;
     }
 
-    /* пузырьки */
+    /* пузырьки — адаптивная ширина, отступы */
     .msg-bubble {
-      max-width: 70%;
-      padding: 16px 24px;
-      border-radius: 32px;
-      font-size: 1.05rem;
+      max-width: 85%;          /* на телефоне шире */
+      padding: 14px 18px;
+      border-radius: 28px;
+      font-size: clamp(0.95rem, 3.5vw, 1.1rem);
       line-height: 1.5;
       word-break: break-word;
       white-space: pre-wrap;
-      box-shadow: 0 10px 18px -8px #000000b0;
+      box-shadow: 0 8px 16px -6px #000000c0;
       border: 1px solid rgba(255,255,255,0.02);
       transition: 0.1s;
     }
 
     .user .msg-bubble {
-      background: #1a4c6e;  /* глубокий синий — цвет формы */
+      background: #1a4f72;     /* глубокий синий */
       color: #f3faff;
-      border-bottom-right-radius: 8px;
-      border-left: 4px solid #72b9ff;
+      border-bottom-right-radius: 6px;
+      border-left: 4px solid #71b6f5;
     }
 
     .assistant .msg-bubble {
-      background: #253b4b;  /* серо-синий, спокойный */
-      color: #edf5ff;
-      border-bottom-left-radius: 8px;
-      border-right: 4px solid #6ea8d9;
+      background: #253f52;     /* мягкий сине-серый */
+      color: #ecf3fe;
+      border-bottom-left-radius: 6px;
+      border-right: 4px solid #67a6d9;
     }
 
-    /* индикатор «печатает» — три изящные точки */
-    .indicator-typing {
+    /* ===== ИНДИКАТОР ПЕЧАТИ (три точки) ===== */
+    .typing-block {
       display: flex;
       align-items: center;
-      gap: 9px;
-      background: #253b4b;
-      padding: 16px 28px;
-      border-radius: 50px;
-      border-bottom-left-radius: 8px;
+      gap: 8px;
+      background: #253f52;
+      padding: 14px 22px;
+      border-radius: 40px;
+      border-bottom-left-radius: 6px;
       width: fit-content;
-      border: 1px solid #3e5f78;
-      box-shadow: 0 6px 12px #00000050;
+      border: 1px solid #3e627f;
+      box-shadow: 0 5px 12px #00000060;
     }
 
-    .indicator-typing .dot {
-      width: 13px;
-      height: 13px;
-      background: #94bde3;
+    .typing-block .dot {
+      width: 11px;
+      height: 11px;
+      background: #97c0e8;
       border-radius: 50%;
       display: inline-block;
-      animation: floatWave 1.3s infinite ease-in-out both;
+      animation: bounceCareer 1.2s infinite ease-in-out both;
     }
 
-    .indicator-typing .dot:nth-child(1) { animation-delay: -0.3s; background: #b4d9ff; }
-    .indicator-typing .dot:nth-child(2) { animation-delay: -0.15s; background: #9ac3ee; }
-    .indicator-typing .dot:nth-child(3) { background: #7daad4; }
+    .typing-block .dot:nth-child(1) { animation-delay: -0.3s; background: #b7daff; }
+    .typing-block .dot:nth-child(2) { animation-delay: -0.15s; background: #9ec6f2; }
+    .typing-block .dot:nth-child(3) { background: #83b2e0; }
 
-    @keyframes floatWave {
+    @keyframes bounceCareer {
       0%, 80%, 100% { transform: translateY(0) scale(0.8); opacity: 0.5; }
-      40% { transform: translateY(-12px) scale(1.2); opacity: 1; background: #c8e4ff; }
+      40% { transform: translateY(-10px) scale(1.1); opacity: 1; background: #cfe5ff; }
     }
 
-    /* область ввода */
-    .input-zone {
-      background: #17222d;
-      padding: 16px 26px 22px 26px;
-      border-top: 2px solid #2f465a;
+    /* ===== ПАНЕЛЬ ВВОДА (полностью адаптивная) ===== */
+    .input-panel {
+      background: #16212c;
+      padding: 14px 18px 20px 18px;
+      border-top: 2px solid #2a4055;
       display: flex;
-      gap: 18px;
+      gap: 12px;
       align-items: flex-end;
     }
 
-    .field-container {
+    .field-group {
       flex: 1;
-      background: #1f3341;
-      border-radius: 44px;
-      border: 1px solid #3d5d78;
-      padding: 6px 12px 6px 26px;
+      background: #1f3343;
+      border-radius: 50px;
+      border: 1px solid #3d5f7c;
+      padding: 6px 8px 6px 20px;
       display: flex;
       align-items: flex-end;
       transition: box-shadow 0.2s, border-color 0.2s;
     }
 
-    .field-container:focus-within {
-      box-shadow: 0 0 0 3px #2b6390b0, inset 0 2px 6px #00000060;
-      border-color: #5f9ed4;
+    .field-group:focus-within {
+      box-shadow: 0 0 0 3px #2b6a9cb0, inset 0 2px 5px #00000070;
+      border-color: #5f9ed0;
     }
 
     textarea {
       width: 100%;
       background: transparent;
       border: none;
-      padding: 16px 8px 16px 0;
+      padding: 12px 8px 12px 0;
       font-family: inherit;
-      font-size: 1.05rem;
+      font-size: clamp(0.95rem, 3.5vw, 1.1rem);
       line-height: 1.5;
-      color: #f0f8ff;
+      color: #f0f7ff;
       resize: none;
       outline: none;
-      max-height: 150px;
-      min-height: 32px;
+      max-height: 130px;
+      min-height: 28px;
     }
 
     textarea::placeholder {
-      color: #5982a3;
+      color: #5985ab;
       font-style: italic;
       font-weight: 300;
       opacity: 0.9;
+      font-size: clamp(0.9rem, 3vw, 1rem);
     }
 
-    /* кнопка отправки */
-    .send-button {
-      background: #1b557a;
-      border: 1px solid #3f86b5;
+    /* кнопка — меняет размер под устройства */
+    .action-btn {
+      background: #1b5a83;
+      border: 1px solid #3f8dc0;
       border-radius: 60px;
-      width: 68px;
-      height: 68px;
+      width: clamp(58px, 15vw, 72px);
+      height: clamp(58px, 15vw, 72px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -219,160 +226,177 @@
       transition: all 0.18s;
       color: white;
       flex-shrink: 0;
-      box-shadow: 0 8px 18px #0f1f30;
+      box-shadow: 0 8px 18px #102233;
     }
 
-    .send-button svg {
-      width: 32px;
-      height: 32px;
+    .action-btn svg {
+      width: clamp(26px, 7vw, 34px);
+      height: clamp(26px, 7vw, 34px);
       fill: currentColor;
-      filter: drop-shadow(0 2px 3px #00000070);
+      filter: drop-shadow(0 2px 4px #00000080);
     }
 
-    .send-button:hover {
-      background: #2572a0;
-      border-color: #6bb1e6;
-      transform: scale(1.04) translateY(-3px);
+    .action-btn:hover {
+      background: #2474a5;
+      border-color: #70b5ec;
+      transform: scale(1.03) translateY(-3px);
     }
 
-    .send-button:active {
-      transform: scale(0.96) translateY(2px);
-      box-shadow: 0 3px 8px #102433;
+    .action-btn:active {
+      transform: scale(0.95) translateY(2px);
+      box-shadow: 0 3px 8px #0e1e30;
     }
 
-    .send-button:disabled {
+    .action-btn:disabled {
       opacity: 0.4;
-      background: #2b4b65;
-      border-color: #3a6283;
+      background: #2a4b66;
+      border-color: #386185;
       transform: none;
       box-shadow: none;
       pointer-events: none;
     }
 
-    /* подсказка-футер */
-    .footer-note {
-      font-size: 0.75rem;
-      color: #4c7393;
+    /* футер */
+    .footer-tip {
+      font-size: clamp(0.65rem, 2.2vw, 0.75rem);
+      color: #4a7397;
       text-align: right;
-      padding: 7px 28px 4px 0;
-      background: #17222d;
+      padding: 6px 22px 5px 0;
+      background: #16212c;
       letter-spacing: 0.2px;
     }
 
-    /* скроллбар */
-    .conversation::-webkit-scrollbar {
-      width: 6px;
+    /* кастомный скролл (webkit) */
+    .messages-view::-webkit-scrollbar {
+      width: 5px;
     }
-    .conversation::-webkit-scrollbar-track {
-      background: #1f3243;
+    .messages-view::-webkit-scrollbar-track {
+      background: #1c3142;
     }
-    .conversation::-webkit-scrollbar-thumb {
-      background: #3b678b;
-      border-radius: 10px;
+    .messages-view::-webkit-scrollbar-thumb {
+      background: #3a668b;
+      border-radius: 8px;
+    }
+
+    /* совсем маленькие экраны (до 400px) */
+    @media (max-width: 420px) {
+      .app-header {
+        padding: 12px 14px 6px 14px;
+      }
+      .msg-bubble {
+        max-width: 92%;
+        padding: 12px 16px;
+      }
+      .input-panel {
+        padding: 12px 12px 16px 12px;
+        gap: 8px;
+      }
+      .field-group {
+        padding-left: 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="chat-frame">
-    <!-- шапка с названием и API ключом (частично скрыт для красоты) -->
-    <div class="header-area">
-      <h1>🧭 Profileo · найди себя</h1>
-      <span class="api-tag">🔑 API · sk_ajKG...boqG</span>
+  <div class="chat-app">
+    <!-- шапка: название и сокращённый ключ (для красоты) -->
+    <div class="app-header">
+      <h1>🧭 Profileo</h1>
+      <span class="key-badge" title="sk_ajKGydMtB6CldDbDulOd004cG6AkboqG">🔑 sk_ajKG...boqG</span>
     </div>
 
-    <!-- контейнер сообщений -->
-    <div id="messageBox" class="conversation">
-      <!-- приветственное сообщение от ассистента (профориентация) -->
-      <div class="msg-line assistant">
+    <!-- окно переписки -->
+    <div id="chatWindow" class="messages-view">
+      <!-- стартовое сообщение от ассистента (профориентация) -->
+      <div class="msg-row assistant">
         <div class="msg-bubble">
-          👋 Привет! Я твой помощник в выборе профессии. 
-          Расскажи, что тебе нравится делать, какие предметы даются легко, 
-          или спроси о любой специальности — вместе подберём то, что подойдёт именно тебе ✨
+          👋 Привет! Я помогу тебе с выбором профессии. Расскажи о своих увлечениях, любимых предметах или спроси про любую специальность — вместе найдём твой путь ✨
         </div>
       </div>
     </div>
 
-    <!-- поле ввода + кнопка -->
-    <div class="input-zone">
-      <div class="field-container">
-        <textarea id="userText" placeholder="например: люблю рисовать и конструировать..." rows="1"></textarea>
+    <!-- нижняя панель: поле ввода + кнопка -->
+    <div class="input-panel">
+      <div class="field-group">
+        <textarea id="msgInput" placeholder="например: люблю рисовать и编程..." rows="1"></textarea>
       </div>
-      <button class="send-button" id="sendMessageBtn" aria-label="Отправить">
+      <button class="action-btn" id="sendBtn" aria-label="Отправить">
         <svg viewBox="0 0 24 24">
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
         </svg>
       </button>
     </div>
-    <div class="footer-note">* профориентация · история не сохраняется · gemini-fast</div>
+    <div class="footer-tip">* профориентация · gemini-fast · история не хранится</div>
   </div>
 
   <script>
     (function() {
-      // ===== КОНФИГУРАЦИЯ =====
+      // ========== НАСТРОЙКИ ==========
       const API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
       const MODEL = 'gemini-fast';
-      // ПРЕДОСТАВЛЕННЫЙ API КЛЮЧ (используется в заголовке Authorization)
+      // ТВОЙ API КЛЮЧ (полностью рабочий)
       const API_KEY = 'sk_ajKGydMtB6CldDbDulOd004cG6AkboqG';
 
-      // DOM элементы
-      const messagesContainer = document.getElementById('messageBox');
-      const inputField = document.getElementById('userText');
-      const sendBtn = document.getElementById('sendMessageBtn');
+      // DOM-элементы
+      const chatContainer = document.getElementById('chatWindow');
+      const textarea = document.getElementById('msgInput');
+      const sendButton = document.getElementById('sendBtn');
 
       // состояние загрузки
       let isLoading = false;
 
-      // --- вспомогательные функции ---
-      function adjustInputHeight() {
-        inputField.style.height = 'auto';
-        const newHeight = Math.min(inputField.scrollHeight, 150);
-        inputField.style.height = newHeight + 'px';
+      // --- адаптивная высота поля ввода ---
+      function resizeTextarea() {
+        textarea.style.height = 'auto';
+        const maxHeight = 130;
+        const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+        textarea.style.height = newHeight + 'px';
       }
 
-      // добавить сообщение в чат
-      function appendMessage(role, text) {
+      // --- добавить сообщение (role: "user" или "assistant") ---
+      function addMessage(role, text) {
         const row = document.createElement('div');
-        row.className = `msg-line ${role}`;
+        row.className = `msg-row ${role}`;
         const bubble = document.createElement('div');
         bubble.className = 'msg-bubble';
-        bubble.textContent = text;  // безопасно
+        bubble.textContent = text;   // безопасно
         row.appendChild(bubble);
-        messagesContainer.appendChild(row);
-        // прокрутка вниз
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        chatContainer.appendChild(row);
+        // прокрутить вниз
+        chatContainer.scrollTop = chatContainer.scrollHeight;
       }
 
-      // показать индикатор "печатает..."
-      function showTyping() {
-        const typingRow = document.createElement('div');
-        typingRow.className = 'msg-line assistant';
-        typingRow.id = 'typingIndicator';
-        typingRow.innerHTML = `
-          <div class="indicator-typing">
+      // --- показать индикатор "печатает" ---
+      function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'msg-row assistant';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = `
+          <div class="typing-block">
             <span class="dot"></span>
             <span class="dot"></span>
             <span class="dot"></span>
           </div>
         `;
-        messagesContainer.appendChild(typingRow);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        chatContainer.appendChild(typingDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
       }
 
-      function hideTyping() {
-        const indicator = document.getElementById('typingIndicator');
-        if (indicator) indicator.remove();
+      function hideTypingIndicator() {
+        const el = document.getElementById('typingIndicator');
+        if (el) el.remove();
       }
 
-      // блокировка интерфейса
-      function setLoading(loading) {
-        isLoading = loading;
-        sendBtn.disabled = loading;
-        inputField.disabled = loading;
+      // --- блокировка/разблокировка ---
+      function setBusy( busy ) {
+        isLoading = busy;
+        sendButton.disabled = busy;
+        textarea.disabled = busy;
       }
 
-      // --- запрос к Pollinations (Gemini) с использованием твоего API ключа ---
-      async function fetchGeminiReply(userMessage) {
-        const requestBody = {
+      // --- запрос к Pollinations (Gemini) с ТВОИМ КЛЮЧОМ ---
+      async function fetchAssistantAnswer(userMessage) {
+        const body = {
           model: MODEL,
           messages: [
             { role: 'user', content: userMessage }
@@ -383,110 +407,112 @@
           const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${API_KEY}`,   // ключ вставлен сюда
+              'Authorization': `Bearer ${API_KEY}`,   // ключ в точности как просили
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(body)
           });
 
           if (!response.ok) {
-            let errorMsg = `код ошибки: ${response.status}`;
+            let errorDetails = `код: ${response.status}`;
             try {
-              const errData = await response.json();
-              errorMsg = errData.error?.message || JSON.stringify(errData);
+              const errJson = await response.json();
+              errorDetails = errJson.error?.message || JSON.stringify(errJson);
             } catch (e) {
-              errorMsg = await response.text() || errorMsg;
+              errorDetails = await response.text() || errorDetails;
             }
-            throw new Error(`Ошибка · ${errorMsg}`);
+            throw new Error(`Ошибка · ${errorDetails}`);
           }
 
           const data = await response.json();
 
-          // обработка ответа в формате OpenAI
+          // стандартный openAI-формат
           if (data.choices && data.choices[0]) {
-            const choice = data.choices[0];
-            if (choice.message && choice.message.content) {
-              return choice.message.content;
-            } else if (choice.text) {
-              return choice.text;
+            const first = data.choices[0];
+            if (first.message && first.message.content) {
+              return first.message.content;
+            } else if (first.text) {
+              return first.text;
             }
           }
-          // fallback
-          return `[ответ] ${JSON.stringify(data).substring(0, 250)}`;
-        } catch (error) {
-          console.error('Fetch error:', error);
-          throw error;
+          // запасной вариант
+          return `🔍 ответ: ${JSON.stringify(data).slice(0, 250)}`;
+        } catch (err) {
+          console.error('fetch error:', err);
+          throw err;
         }
       }
 
-      // --- обработка отправки сообщения ---
+      // --- обработка отправки ---
       async function handleSend() {
-        const userMsg = inputField.value.trim();
-        if (userMsg === '' || isLoading) return;
+        const userText = textarea.value.trim();
+        if (userText === '' || isLoading) return;
 
-        // 1. отобразить сообщение пользователя (справа)
-        appendMessage('user', userMsg);
+        // 1. сообщение пользователя
+        addMessage('user', userText);
 
         // 2. очистить поле
-        inputField.value = '';
-        adjustInputHeight();
+        textarea.value = '';
+        resizeTextarea();
 
-        // 3. показать индикатор набора
-        showTyping();
+        // 3. показать "печатает"
+        showTypingIndicator();
 
-        // 4. заблокировать форму
-        setLoading(true);
+        // 4. заблокировать
+        setBusy(true);
 
         // 5. запрос к API
         try {
-          const assistantReply = await fetchGeminiReply(userMsg);
-          hideTyping();
-          appendMessage('assistant', assistantReply);
+          const reply = await fetchAssistantAnswer(userText);
+          hideTypingIndicator();
+          addMessage('assistant', reply);
         } catch (error) {
-          hideTyping();
-          let friendlyError = '😓 Не удалось получить ответ. Проверь подключение или попробуй позже.';
+          hideTypingIndicator();
+          let errorMsg = '😥 Не удалось получить ответ. Попробуй ещё раз.';
           if (error.message) {
-            friendlyError = `⚠️ ${error.message.slice(0, 200)}`;
+            errorMsg = `⚠️ ${error.message.slice(0, 200)}`;
           }
-          appendMessage('assistant', friendlyError);
+          addMessage('assistant', errorMsg);
         } finally {
-          setLoading(false);
-          inputField.focus();
+          setBusy(false);
+          textarea.focus();
         }
       }
 
       // --- обработчики событий ---
-      inputField.addEventListener('input', adjustInputHeight);
+      textarea.addEventListener('input', resizeTextarea);
 
-      inputField.addEventListener('keydown', (e) => {
+      textarea.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();  // отправка по Enter
+          e.preventDefault();   // отправка по Enter
           handleSend();
         }
       });
 
-      sendBtn.addEventListener('click', handleSend);
+      sendButton.addEventListener('click', handleSend);
 
       // начальная настройка
       window.addEventListener('load', () => {
-        inputField.focus();
-        adjustInputHeight();
+        textarea.focus();
+        resizeTextarea();
       });
 
-      // дополнительно подстройка высоты при изменении окна
-      window.addEventListener('resize', adjustInputHeight);
+      // на случай ресайза окна (телефон/планшет)
+      window.addEventListener('resize', resizeTextarea);
     })();
   </script>
 
   <!-- 
-    Дизайн и цель проекта:
-    – Мягкая тёмная тема с градиентами (спокойная для глаз, подходит для школы).
-    – Сообщения пользователя (школьник) — глубокий синий, ассистента — мягкий серо-синий.
-    – Индикатор набора — три плавно покачивающиеся точки.
-    – Поле ввода с подсказкой про интересы, профессии.
-    – Заголовок отражает суть: профориентация, помощь в выборе пути.
-    – API-ключ уже встроен (sk_ajKG...), всё готово к работе.
-    – Чат не хранит историю, но это и не нужно — каждый вопрос про профессию уникален.
+    ДИЗАЙН И ЦЕЛЬ:
+    – Полностью адаптивный интерфейс (clamp, % и медиазапросы). 
+      На телефоне кнопка и поля комфортного размера, пузырьки шире.
+    – Тёмная тема с градиентами, профессиональная, но уютная.
+    – Сообщения: пользователь (синий, справа), ассистент (серо-синий, слева).
+    – Индикатор печати — прыгающие точки.
+    – Использован предоставленный API-ключ sk_ajKGydMtB6CldDbDulOd004cG6AkboqG.
+    – Тематика: профориентация для школьников. Помогает узнать о профессиях.
+    – Минимум лишнего: только чат, поле ввода, кнопка. 
+    – Работает сразу в браузере без дополнительных действий.
   -->
 </body>
 </html>
