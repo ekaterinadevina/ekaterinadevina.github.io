@@ -1,1 +1,492 @@
-//Здесь код кащей страницы
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profileo · чат профориентации</title>
+  <style>
+    /* ===== мягкая тёмная тема ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 20% 30%, #1b2633, #0d1219);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* основной контейнер — как стильная тетрадь */
+    .chat-frame {
+      width: 100%;
+      max-width: 1000px;
+      height: 85vh;
+      max-height: 820px;
+      background: #1d2832;
+      border-radius: 44px 44px 40px 40px;
+      box-shadow: 0 30px 55px -12px #000000d0, inset 0 1px 2px rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #314d62;
+      backdrop-filter: blur(1px);
+    }
+
+    /* верхняя плашка */
+    .header-area {
+      padding: 20px 28px 12px 28px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border-bottom: 2px dashed #2e4558;
+    }
+
+    .header-area h1 {
+      font-size: 2rem;
+      font-weight: 520;
+      background: linear-gradient(145deg, #c2e0ff, #9ac6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      text-shadow: 0 3px 7px #00000050;
+    }
+
+    .api-tag {
+      background: #263d50;
+      padding: 8px 20px;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #cadeff;
+      border: 1px solid #3f6180;
+      box-shadow: inset 0 1px 5px #00000070;
+      backdrop-filter: blur(2px);
+    }
+
+    /* окно сообщений */
+    .conversation {
+      flex: 1;
+      overflow-y: auto;
+      padding: 26px 28px 18px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      background: #19232e;
+      box-shadow: inset 0 10px 18px -12px #04080c;
+      scroll-behavior: smooth;
+    }
+
+    /* строки сообщений */
+    .msg-line {
+      display: flex;
+      width: 100%;
+    }
+
+    .msg-line.user {
+      justify-content: flex-end;
+    }
+
+    .msg-line.assistant {
+      justify-content: flex-start;
+    }
+
+    /* пузырьки */
+    .msg-bubble {
+      max-width: 70%;
+      padding: 16px 24px;
+      border-radius: 32px;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+      box-shadow: 0 10px 18px -8px #000000b0;
+      border: 1px solid rgba(255,255,255,0.02);
+      transition: 0.1s;
+    }
+
+    .user .msg-bubble {
+      background: #1a4c6e;  /* глубокий синий — цвет формы */
+      color: #f3faff;
+      border-bottom-right-radius: 8px;
+      border-left: 4px solid #72b9ff;
+    }
+
+    .assistant .msg-bubble {
+      background: #253b4b;  /* серо-синий, спокойный */
+      color: #edf5ff;
+      border-bottom-left-radius: 8px;
+      border-right: 4px solid #6ea8d9;
+    }
+
+    /* индикатор «печатает» — три изящные точки */
+    .indicator-typing {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: #253b4b;
+      padding: 16px 28px;
+      border-radius: 50px;
+      border-bottom-left-radius: 8px;
+      width: fit-content;
+      border: 1px solid #3e5f78;
+      box-shadow: 0 6px 12px #00000050;
+    }
+
+    .indicator-typing .dot {
+      width: 13px;
+      height: 13px;
+      background: #94bde3;
+      border-radius: 50%;
+      display: inline-block;
+      animation: floatWave 1.3s infinite ease-in-out both;
+    }
+
+    .indicator-typing .dot:nth-child(1) { animation-delay: -0.3s; background: #b4d9ff; }
+    .indicator-typing .dot:nth-child(2) { animation-delay: -0.15s; background: #9ac3ee; }
+    .indicator-typing .dot:nth-child(3) { background: #7daad4; }
+
+    @keyframes floatWave {
+      0%, 80%, 100% { transform: translateY(0) scale(0.8); opacity: 0.5; }
+      40% { transform: translateY(-12px) scale(1.2); opacity: 1; background: #c8e4ff; }
+    }
+
+    /* область ввода */
+    .input-zone {
+      background: #17222d;
+      padding: 16px 26px 22px 26px;
+      border-top: 2px solid #2f465a;
+      display: flex;
+      gap: 18px;
+      align-items: flex-end;
+    }
+
+    .field-container {
+      flex: 1;
+      background: #1f3341;
+      border-radius: 44px;
+      border: 1px solid #3d5d78;
+      padding: 6px 12px 6px 26px;
+      display: flex;
+      align-items: flex-end;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .field-container:focus-within {
+      box-shadow: 0 0 0 3px #2b6390b0, inset 0 2px 6px #00000060;
+      border-color: #5f9ed4;
+    }
+
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      padding: 16px 8px 16px 0;
+      font-family: inherit;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: #f0f8ff;
+      resize: none;
+      outline: none;
+      max-height: 150px;
+      min-height: 32px;
+    }
+
+    textarea::placeholder {
+      color: #5982a3;
+      font-style: italic;
+      font-weight: 300;
+      opacity: 0.9;
+    }
+
+    /* кнопка отправки */
+    .send-button {
+      background: #1b557a;
+      border: 1px solid #3f86b5;
+      border-radius: 60px;
+      width: 68px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.18s;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 8px 18px #0f1f30;
+    }
+
+    .send-button svg {
+      width: 32px;
+      height: 32px;
+      fill: currentColor;
+      filter: drop-shadow(0 2px 3px #00000070);
+    }
+
+    .send-button:hover {
+      background: #2572a0;
+      border-color: #6bb1e6;
+      transform: scale(1.04) translateY(-3px);
+    }
+
+    .send-button:active {
+      transform: scale(0.96) translateY(2px);
+      box-shadow: 0 3px 8px #102433;
+    }
+
+    .send-button:disabled {
+      opacity: 0.4;
+      background: #2b4b65;
+      border-color: #3a6283;
+      transform: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    /* подсказка-футер */
+    .footer-note {
+      font-size: 0.75rem;
+      color: #4c7393;
+      text-align: right;
+      padding: 7px 28px 4px 0;
+      background: #17222d;
+      letter-spacing: 0.2px;
+    }
+
+    /* скроллбар */
+    .conversation::-webkit-scrollbar {
+      width: 6px;
+    }
+    .conversation::-webkit-scrollbar-track {
+      background: #1f3243;
+    }
+    .conversation::-webkit-scrollbar-thumb {
+      background: #3b678b;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-frame">
+    <!-- шапка с названием и API ключом (частично скрыт для красоты) -->
+    <div class="header-area">
+      <h1>🧭 Profileo · найди себя</h1>
+      <span class="api-tag">🔑 API · sk_ajKG...boqG</span>
+    </div>
+
+    <!-- контейнер сообщений -->
+    <div id="messageBox" class="conversation">
+      <!-- приветственное сообщение от ассистента (профориентация) -->
+      <div class="msg-line assistant">
+        <div class="msg-bubble">
+          👋 Привет! Я твой помощник в выборе профессии. 
+          Расскажи, что тебе нравится делать, какие предметы даются легко, 
+          или спроси о любой специальности — вместе подберём то, что подойдёт именно тебе ✨
+        </div>
+      </div>
+    </div>
+
+    <!-- поле ввода + кнопка -->
+    <div class="input-zone">
+      <div class="field-container">
+        <textarea id="userText" placeholder="например: люблю рисовать и конструировать..." rows="1"></textarea>
+      </div>
+      <button class="send-button" id="sendMessageBtn" aria-label="Отправить">
+        <svg viewBox="0 0 24 24">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="footer-note">* профориентация · история не сохраняется · gemini-fast</div>
+  </div>
+
+  <script>
+    (function() {
+      // ===== КОНФИГУРАЦИЯ =====
+      const API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
+      const MODEL = 'gemini-fast';
+      // ПРЕДОСТАВЛЕННЫЙ API КЛЮЧ (используется в заголовке Authorization)
+      const API_KEY = 'sk_ajKGydMtB6CldDbDulOd004cG6AkboqG';
+
+      // DOM элементы
+      const messagesContainer = document.getElementById('messageBox');
+      const inputField = document.getElementById('userText');
+      const sendBtn = document.getElementById('sendMessageBtn');
+
+      // состояние загрузки
+      let isLoading = false;
+
+      // --- вспомогательные функции ---
+      function adjustInputHeight() {
+        inputField.style.height = 'auto';
+        const newHeight = Math.min(inputField.scrollHeight, 150);
+        inputField.style.height = newHeight + 'px';
+      }
+
+      // добавить сообщение в чат
+      function appendMessage(role, text) {
+        const row = document.createElement('div');
+        row.className = `msg-line ${role}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.textContent = text;  // безопасно
+        row.appendChild(bubble);
+        messagesContainer.appendChild(row);
+        // прокрутка вниз
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // показать индикатор "печатает..."
+      function showTyping() {
+        const typingRow = document.createElement('div');
+        typingRow.className = 'msg-line assistant';
+        typingRow.id = 'typingIndicator';
+        typingRow.innerHTML = `
+          <div class="indicator-typing">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        `;
+        messagesContainer.appendChild(typingRow);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function hideTyping() {
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) indicator.remove();
+      }
+
+      // блокировка интерфейса
+      function setLoading(loading) {
+        isLoading = loading;
+        sendBtn.disabled = loading;
+        inputField.disabled = loading;
+      }
+
+      // --- запрос к Pollinations (Gemini) с использованием твоего API ключа ---
+      async function fetchGeminiReply(userMessage) {
+        const requestBody = {
+          model: MODEL,
+          messages: [
+            { role: 'user', content: userMessage }
+          ]
+        };
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${API_KEY}`,   // ключ вставлен сюда
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          });
+
+          if (!response.ok) {
+            let errorMsg = `код ошибки: ${response.status}`;
+            try {
+              const errData = await response.json();
+              errorMsg = errData.error?.message || JSON.stringify(errData);
+            } catch (e) {
+              errorMsg = await response.text() || errorMsg;
+            }
+            throw new Error(`Ошибка · ${errorMsg}`);
+          }
+
+          const data = await response.json();
+
+          // обработка ответа в формате OpenAI
+          if (data.choices && data.choices[0]) {
+            const choice = data.choices[0];
+            if (choice.message && choice.message.content) {
+              return choice.message.content;
+            } else if (choice.text) {
+              return choice.text;
+            }
+          }
+          // fallback
+          return `[ответ] ${JSON.stringify(data).substring(0, 250)}`;
+        } catch (error) {
+          console.error('Fetch error:', error);
+          throw error;
+        }
+      }
+
+      // --- обработка отправки сообщения ---
+      async function handleSend() {
+        const userMsg = inputField.value.trim();
+        if (userMsg === '' || isLoading) return;
+
+        // 1. отобразить сообщение пользователя (справа)
+        appendMessage('user', userMsg);
+
+        // 2. очистить поле
+        inputField.value = '';
+        adjustInputHeight();
+
+        // 3. показать индикатор набора
+        showTyping();
+
+        // 4. заблокировать форму
+        setLoading(true);
+
+        // 5. запрос к API
+        try {
+          const assistantReply = await fetchGeminiReply(userMsg);
+          hideTyping();
+          appendMessage('assistant', assistantReply);
+        } catch (error) {
+          hideTyping();
+          let friendlyError = '😓 Не удалось получить ответ. Проверь подключение или попробуй позже.';
+          if (error.message) {
+            friendlyError = `⚠️ ${error.message.slice(0, 200)}`;
+          }
+          appendMessage('assistant', friendlyError);
+        } finally {
+          setLoading(false);
+          inputField.focus();
+        }
+      }
+
+      // --- обработчики событий ---
+      inputField.addEventListener('input', adjustInputHeight);
+
+      inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();  // отправка по Enter
+          handleSend();
+        }
+      });
+
+      sendBtn.addEventListener('click', handleSend);
+
+      // начальная настройка
+      window.addEventListener('load', () => {
+        inputField.focus();
+        adjustInputHeight();
+      });
+
+      // дополнительно подстройка высоты при изменении окна
+      window.addEventListener('resize', adjustInputHeight);
+    })();
+  </script>
+
+  <!-- 
+    Дизайн и цель проекта:
+    – Мягкая тёмная тема с градиентами (спокойная для глаз, подходит для школы).
+    – Сообщения пользователя (школьник) — глубокий синий, ассистента — мягкий серо-синий.
+    – Индикатор набора — три плавно покачивающиеся точки.
+    – Поле ввода с подсказкой про интересы, профессии.
+    – Заголовок отражает суть: профориентация, помощь в выборе пути.
+    – API-ключ уже встроен (sk_ajKG...), всё готово к работе.
+    – Чат не хранит историю, но это и не нужно — каждый вопрос про профессию уникален.
+  -->
+</body>
+</html>
