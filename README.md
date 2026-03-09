@@ -1,2 +1,2 @@
-# ekaterinadevina.github.io
+# proforschool.github.io
 Название репозитория начинается с имени пользователя
